@@ -31,9 +31,9 @@ if uploaded_file is not None:
     # 3. Extract Specific Data fields using Regular Expressions (Regex)
     st.subheader("Structured Data Output")
     
-    name_match = re.search(r'(?i)(?:Name|Customer Name)\s*[:\-]?\s*([A-Za-z\s]+)', raw_text)
-    acc_match = re.search(r'(?i)(?:Account|A/C)\s*(?:No|Number)?\s*[:\-]?\s*(\d{9,18})', raw_text)
-    ifsc_match = re.search(r'(?i)IFSC\s*[:\-]?\s*([A-Z]{4}0[A-Z0-9]{6})', raw_text)
+   name_match = re.search(r'(?i)(?:Name|Customer Name|Remitter)[\s\.\:\-]*([A-Za-z\s]+?)(?=\s\s|A/C|\n)', raw_text)
+acc_match = re.search(r'(?i)(?:Account|A/C|Acc)\s*(?:No|Number)?[\s\.\:\-]*(\d{9,18})', raw_text)
+ifsc_match = re.search(r'(?i)IFSC.*?([A-Z]{4}0[A-Z0-9]{6})', raw_text)
     
     # Build a table structure of the extracted data
     extracted_data = {
