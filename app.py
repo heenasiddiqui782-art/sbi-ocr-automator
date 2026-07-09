@@ -22,7 +22,7 @@ if uploaded_file is not None:
     
     # 2. Run OCR Processing
     with st.spinner("Processing document text via AI OCR..."):
-        raw_text = pytesseract.image_to_string(image)
+        raw_text = pytesseract.image_to_string(image, config='--psm 6')
         
     # Allow the user to see what the AI detected
     with st.expander("View Raw Extracted Text"):
