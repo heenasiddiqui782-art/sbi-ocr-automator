@@ -31,16 +31,60 @@ if uploaded_file is not None:
     # 3. Extract Specific Data fields using Regular Expressions (Regex)
         st.subheader("Structured Data Output")
     
-    name_match = re.search(r'(?i)(?:Name|Customer Name|Remitter)[\s\.\:\-]*([A-Za-z\s]+?)(?=\s\s|A/C|\n)', raw_text)
-    acc_match = re.search(r'(?i)(?:Account|A/C|Acc)\s*(?:No|Number)?[\s\.\:\-]*(\d{9,18})', raw_text)
+    # 1. Broad Capture Regexes (Grabs messy strings from boxed forms)
+    name_match = re.search(r'(?i)(?:Name|Customer Name|Remitter)[\s\.\:\-\*]+([^0-9]{5,60})(?=\n|Date|2\.|Account|A/C)', raw_text)
+    acc_match = re.search(r'(?i)(?:Account|A/C|Acc)\s*(?:No|Number)?[\s\.\:\-\*]*([\d\W_]{9,40})', raw_text)
     ifsc_match = re.search(r'(?i)IFSC.*?([A-Z]{4}0[A-Z0-9]{6})', raw_text)
     
     # New Field Extractions
-    aadhar_match = re.search(r'(?i)(?:Aadhaar|Aadhar|UID)[\s\.\:\-]*(\d{4}[\s\-]?\d{4}[\s\-]?\d{4}|\d{12})', raw_text)
-    pan_match = re.search(r'(?i)PAN[\s\.\:\-]*([A-Z]{5}\d{4}[A-Z]{1})', raw_text)
-    mobile_match = re.search(r'(?i)Mobile(?:\s*No\.?|\s*Number)?\s*[:\-]?\s*(\d{10})', raw_text)
-    mode_match = re.search(r'(?i)\b(Saving|Savings|Current|CC|OD)\b', raw_text)
-    # Build a table structure of the extracted data
+    aadhar_match = re.search(r'(?i)(?:Aadhaar|Aadhar|UID)[\s\.\:\-]*([\d\W_]{12,20})', raw_text)
+    pan_match = re.search(r'(?i)PAN[\s\.\:\-]*([A-Z0-9\W_]{10,15})', raw_text)
+    mobile_match = re.search(r'(?i)(?:Mobile|Phone|Mob|Mo)[\s\.\:\-]*([\d\W_]{10,20})', raw_text)
+    mode_match = re.search(r'(?i)\b(Normal|Mormal|Small|Minor|Saving|Savings|Current|CC|OD)\b', raw_text)
+
+    # 2. Advanced Filtering & Cleaning Logic (The Magic Vacuum)
+    if name_match:
+        clean_name = re.sub(r'[^a-zA-Z\s]', '', name_match.group(1))
+        clean_name = re.sub(r'\s+', ' ', clean_name).strip() 
+    else:
+        clean_name = "Review Required"
+
+    if acc_match:
+        clean_acc = re.sub(r'\D', '', acc_match.group(1))
+        if not (9 <= len(clean_acc) <= 18): clean_acc = "Review Required"
+    else:
+        clean_acc = "Review Required"
+
+    clean_ifsc = ifsc_match.group(1).strip() if ifsc_match else "Review Required"
+    
+    if aadhar_match:
+        clean_aadhar = re.sub(r'\D', '', aadhar_match.group(1))
+        if len(clean_aadhar) != 12: clean_aadhar = "Review Required"
+    else:
+        clean_aadhar = "Review Required"
+
+    if pan_match:
+        clean_pan = re.sub(r'[^A-Z0-9]', '', pan_match.group(1).upper())
+        if len(clean_pan) != 10: clean_pan = "Review Required"
+    else:
+        clean_pan = "Review Required"
+
+    if mobile_match:
+        clean_mobile = re.sub(r'\D', '', mobile_match.group(1))
+        if len(clean_mobile) >= 10: 
+            clean_mobile = clean_mobile[-10:]
+        else: 
+            clean_mobile = "Review Required"
+    else:
+        clean_mobile = "Review Required"
+
+    if mode_match:
+        clean_mode = mode_match.group(1).capitalize()
+        if clean_mode == "Mormal": clean_mode = "Normal" 
+    else:
+        clean_mode = "Review Required"
+
+    # 3. Build a table structure of the extracted data
     extracted_data = {
         "Field Name": [
             "Customer Name", 
@@ -52,13 +96,13 @@ if uploaded_file is not None:
             "Account Type"
         ],
         "Extracted Value": [
-            name_match.group(1).strip() if name_match else "Review Required",
-            acc_match.group(1).strip() if acc_match else "Review Required",
-            ifsc_match.group(1).strip() if ifsc_match else "Review Required",
-            aadhar_match.group(1).strip() if aadhar_match else "Review Required",
-            pan_match.group(1).strip().upper() if pan_match else "Review Required",
-            mobile_match.group(1).strip() if mobile_match else "Review Required",
-            mode_match.group(1).strip().capitalize() if mode_match else "Review Required"
+            clean_name,
+            clean_acc,
+            clean_ifsc,
+            clean_aadhar,
+            clean_pan,
+            clean_mobile,
+            clean_mode
         ]
     }
     
