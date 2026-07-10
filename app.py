@@ -35,15 +35,34 @@ if uploaded_file is not None:
     acc_match = re.search(r'(?i)(?:Account|A/C|Acc)\s*(?:No|Number)?[\s\.\:\-]*(\d{9,18})', raw_text)
     ifsc_match = re.search(r'(?i)IFSC.*?([A-Z]{4}0[A-Z0-9]{6})', raw_text)
     
+    # New Field Extractions
+    aadhar_match = re.search(r'(?i)(?:Aadhaar|Aadhar|UID)[\s\.\:\-]*(\d{4}[\s\-]?\d{4}[\s\-]?\d{4}|\d{12})', raw_text)
+    pan_match = re.search(r'(?i)PAN[\s\.\:\-]*([A-Z]{5}\d{4}[A-Z]{1})', raw_text)
+    mobile_match = re.search(r'(?i)(?:Mobile|Phone|Mob|Mo)[\s\.\:\-]*([6-9]\d{9})', raw_text)
+    mode_match = re.search(r'(?i)(Saving|Savings|Current|CC|OD)', raw_text)
+
     # Build a table structure of the extracted data
     extracted_data = {
-        "Field Name": ["Customer Name", "Account Number", "IFSC Code"],
+        "Field Name": [
+            "Customer Name", 
+            "Account Number", 
+            "IFSC Code", 
+            "Aadhaar Number", 
+            "PAN Card", 
+            "Mobile Number", 
+            "Account Type"
+        ],
         "Extracted Value": [
             name_match.group(1).strip() if name_match else "Review Required",
             acc_match.group(1).strip() if acc_match else "Review Required",
-            ifsc_match.group(1).strip() if ifsc_match else "Review Required"
+            ifsc_match.group(1).strip() if ifsc_match else "Review Required",
+            aadhar_match.group(1).strip() if aadhar_match else "Review Required",
+            pan_match.group(1).strip().upper() if pan_match else "Review Required",
+            mobile_match.group(1).strip() if mobile_match else "Review Required",
+            mode_match.group(1).strip().capitalize() if mode_match else "Review Required"
         ]
     }
+    
     
     # 4. Display as a clean user interface table
     df = pd.DataFrame(extracted_data)
