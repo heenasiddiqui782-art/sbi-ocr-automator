@@ -31,15 +31,22 @@ if uploaded_file is not None:
     # 3. Extract Specific Data fields using Regular Expressions (Regex)
         st.subheader("Structured Data Output")
     
-    # 1. Broad Capture Regexes (Grabs messy strings from boxed forms)
-    name_match = re.search(r'(?i)(?:Name|Customer Name|Remitter)[\s\.\:\-\*]+([^0-9]{5,60})(?=\n|Date|2\.|Account|A/C)', raw_text)
-    acc_match = re.search(r'(?i)(?:Account|A/C|Acc)\s*(?:No|Number)?[\s\.\:\-\*]*([\d\W_]{9,40})', raw_text)
+    # 1. Broad Capture Regexes (Updated to handle multi-line gaps and form instructions)
+    
+    # Name: Grabs letters/spaces non-greedily, STOPS explicitly when it sees PAN, TIN, Date, or Address
+    name_match = re.search(r'(?i)(?:Name|Customer Name|Remitter)[\s\.\:\-\*]*\n*([A-Za-z\s]{5,50}?)(?=\n*PAN|\n*TIN|\n*Current Address|\n*Date|$)', raw_text)
+    
+    acc_match = re.search(r'(?i)(?:Account|A/C|Acc)\s*(?:No|Number)?[\s\.\:\-\*]*\n*([\d\W_]{9,40})', raw_text)
     ifsc_match = re.search(r'(?i)IFSC.*?([A-Z]{4}0[A-Z0-9]{6})', raw_text)
     
     # New Field Extractions
-    aadhar_match = re.search(r'(?i)(?:Aadhaar|Aadhar|UID)[\s\.\:\-]*([\d\W_]{12,20})', raw_text)
-    pan_match = re.search(r'(?i)PAN[\s\.\:\-]*([A-Z0-9\W_]{10,15})', raw_text)
-    mobile_match = re.search(r'(?i)(?:Mobile|Phone|Mob|Mo)[\s\.\:\-]*([\d\W_]{10,20})', raw_text)
+    aadhar_match = re.search(r'(?i)(?:Aadhaar|Aadhar|UID)[\s\.\:\-]*\n*([\d\W_]{12,20})', raw_text)
+    
+    # PAN: Looks for "PAN", skips up to 150 characters of form instructions, then grabs the 10-digit ID
+    pan_match = re.search(r'(?i)PAN[\s\S]{0,150}?(?:\b|\n)([A-Z0-9]{10})\b', raw_text)
+    
+    mobile_match = re.search(r'(?i)(?:Mobile|Phone|Mob|Mo)[\s\.\:\-]*\n*([\d\W_]{10,20})', raw_text)
+    mode_match = re.search(r'(?i)\b(Normal|Mormal|Small|Minor|Saving|Savings|Current|CC|OD)\b', raw_text)
     mode_match = re.search(r'(?i)\b(Normal|Mormal|Small|Minor|Saving|Savings|Current|CC|OD)\b', raw_text)
 
     # 2. Advanced Filtering & Cleaning Logic (The Magic Vacuum)
