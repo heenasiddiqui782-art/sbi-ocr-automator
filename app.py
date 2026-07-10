@@ -46,8 +46,7 @@ if uploaded_file is not None:
     pan_match = re.search(r'(?i)PAN[\s\S]{0,150}?(?:\b|\n)([A-Z0-9]{10})\b', raw_text)
     
     mobile_match = re.search(r'(?i)(?:Mobile|Phone|Mob|Mo)[\s\.\:\-]*\n*([\d\W_]{10,20})', raw_text)
-    mode_match = re.search(r'(?i)\b(Normal|Mormal|Small|Minor|Saving|Savings|Current|CC|OD)\b', raw_text)
-    mode_match = re.search(r'(?i)\b(Normal|Mormal|Small|Minor|Saving|Savings|Current|CC|OD)\b', raw_text)
+    mode_match = re.search(r'(?i)\b(Normal|Mormal|Small|Minor|Saving|Savings|Current(?!\s*Address)|CC|OD)\b', raw_text)
 
     # 2. Advanced Filtering & Cleaning Logic (The Magic Vacuum)
     if name_match:
