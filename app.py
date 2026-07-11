@@ -45,7 +45,7 @@ if uploaded_file is not None:
     # PAN: Looks for "PAN", skips up to 150 characters of form instructions, then grabs the 10-digit ID
     pan_match = re.search(r'(?i)PAN[\s\S]{0,150}?(?:\b|\n)([A-Z0-9]{10})\b', raw_text)
     
-    mobile_match = re.search(r'(?i)(?:Mobile|Phone|Mob|Mo)[\s\.\:\-]*\n*([\d\W_]{10,20})', raw_text)
+    mobile_match = re.search(r'(?i)(?:Mobile|Phone|Mob|Mo)\s*(?:No|Number)?[\s\.\:\-]*\n*([\d\W_]{10,20})', raw_text)
     mode_match = re.search(r'(?i)\b(Normal|Mormal|Small|Minor|Saving|Savings|Current(?!\s*Address)|CC|OD)\b', raw_text)
 
     # 2. Advanced Filtering & Cleaning Logic (The Magic Vacuum)
