@@ -5,7 +5,7 @@ import re
 import pandas as pd
 
 # Point pytesseract to where you installed the Windows Tesseract software
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Set up the web page layout
 st.set_page_config(page_title="Customer Form OCR Automator", layout="centered")
