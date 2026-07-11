@@ -3,7 +3,34 @@ import pytesseract
 from PIL import Image
 import re
 import pandas as pd
+import cv2            
+import numpy as np    
 
+# --- NEW PRE-PROCESSING FUNCTION ---
+def remove_form_boxes(image):
+    # Convert to grayscale
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    # Apply thresholding
+    thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+    
+    # Remove Horizontal Lines
+    horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 1))
+    detect_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
+    cnts = cv2.findContours(detect_horizontal, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    for c in cnts:
+        cv2.drawContours(image, [c], -1, (255, 255, 255), 2)
+        
+    # Remove Vertical Lines
+    vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 25))
+    detect_vertical = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, vertical_kernel, iterations=2)
+    cnts = cv2.findContours(detect_vertical, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    for c in cnts:
+        cv2.drawContours(image, [c], -1, (255, 255, 255), 2)
+        
+    return image
 
 
 # Set up the web page layout
@@ -16,22 +43,30 @@ st.write("SBI Intern Project: Automated extraction tool to eliminate manual data
 uploaded_file = st.file_uploader("Upload Scanned Form (JPG/PNG)", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Display the uploaded image
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Document", use_column_width=True)
+    # --- UPDATED: IMAGE PRE-PROCESSING BRIDGE ---
+    # Read the uploaded file into an OpenCV format in memory
+    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+    opencv_image = cv2.imdecode(file_bytes, 1)
+    
+    # Display the uploaded image 
+    st.image(cv2.cvtColor(opencv_image, cv2.COLOR_BGR2RGB), caption="Uploaded Document", use_column_width=True)
+    
+    with st.spinner("Removing form grid lines..."):
+        # Erase the boxes using our new function
+        cleaned_image = remove_form_boxes(opencv_image)
+        # Convert back to standard RGB format for accurate OCR reading
+        final_image_for_ocr = cv2.cvtColor(cleaned_image, cv2.COLOR_BGR2RGB)
     
     # 2. Run OCR Processing
     with st.spinner("Processing document text via AI OCR..."):
-        raw_text = pytesseract.image_to_string(image)
+        raw_text = pytesseract.image_to_string(final_image_for_ocr)
         
     # Allow the user to see what the AI detected
     with st.expander("View Raw Extracted Text"):
         st.text(raw_text)
         
     # 3. Extract Specific Data fields using Regular Expressions (Regex)
-        st.subheader("Structured Data Output")
-    
-    # 1. Broad Capture Regexes (Updated to handle multi-line gaps and form instructions)
+    st.subheader("Structured Data Output")
     
     # Name: Grabs letters/spaces non-greedily, STOPS explicitly when it sees PAN, TIN, Date, or Address
     name_match = re.search(r'(?i)(?:Name|Customer Name|Remitter)[\s\.\:\-\*]*\n*([A-Za-z\s]{5,50}?)(?=\n*PAN|\n*TIN|\n*Current Address|\n*Date|$)', raw_text)
@@ -39,7 +74,6 @@ if uploaded_file is not None:
     acc_match = re.search(r'(?i)(?:Account|A/C|Acc)\s*(?:No|Number)?[\s\.\:\-\*]*\n*([\d\W_]{9,40})', raw_text)
     ifsc_match = re.search(r'(?i)IFSC.*?([A-Z]{4}0[A-Z0-9]{6})', raw_text)
     
-    # New Field Extractions
     aadhar_match = re.search(r'(?i)(?:Aadhaar|Aadhar|UID)[\s\.\:\-]*\n*([\d\W_]{12,20})', raw_text)
     
     # PAN: Looks for "PAN", skips up to 150 characters of form instructions, then grabs the 10-digit ID
@@ -48,7 +82,7 @@ if uploaded_file is not None:
     mobile_match = re.search(r'(?i)(?:Mobile|Phone|Mob|Mo)\s*(?:No|Number)?[\s\.\:\-]*\n*([\d\W_]{10,20})', raw_text)
     mode_match = re.search(r'(?i)\b(Normal|Mormal|Small|Minor|Saving|Savings|Current(?!\s*Address)|CC|OD)\b', raw_text)
 
-    # 2. Advanced Filtering & Cleaning Logic (The Magic Vacuum)
+    # 2. Advanced Filtering & Cleaning Logic 
     if name_match:
         clean_name = re.sub(r'[^a-zA-Z\s]', '', name_match.group(1))
         clean_name = re.sub(r'\s+', ' ', clean_name).strip() 
@@ -112,12 +146,11 @@ if uploaded_file is not None:
         ]
     }
     
-    
     # 4. Display as a clean user interface table
     df = pd.DataFrame(extracted_data)
     st.table(df)
     
-    # 5. Export Feature to save hours of typing
+    # 5. Export Feature
     csv = df.to_csv(index=False)
     st.download_button(
         label="Export Data to Excel/CSV",
@@ -125,3 +158,4 @@ if uploaded_file is not None:
         file_name="sbi_extracted_data.csv",
         mime="text/csv"
     )
+    
