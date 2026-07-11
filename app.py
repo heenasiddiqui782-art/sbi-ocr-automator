@@ -48,7 +48,7 @@ if uploaded_file is not None:
             "Account Number", 
             "IFSC Code", 
             "Aadhaar Number", 
-            "PAN Card", 
+            "PAN Number", 
             "Mobile Number", 
             "Account Type"
         ],
