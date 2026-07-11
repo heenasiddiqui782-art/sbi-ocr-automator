@@ -38,7 +38,7 @@ if uploaded_file is not None:
     
     # New Field Extractions with boundary adjustments
     aadhar_match = re.search(r'(?i)(?:Aadhaar|Aadhar|UID)[\s\.\:\-]*(\d{4}[\s\-]?\d{4}[\s\-]?\d{4}|\d{12})', raw_text)
-    pan_match = re.search(r'(?i)PAN[\s\.\:\-]*([A-Z]{5}\d{4}[A-Z]{1})', raw_text)
+    pan_match = re.search(r'(?i)PAN\s*[\s\S]{0,100}?\b([A-Z]{5}[0-9]{4}[A-Z]{1})\b', raw_text)
     mobile_match = re.search(r'(?i)Mobile(?:\s*No\.?|\s*Number)?\s*[:\-]?\s*(\d{10})', raw_text)
     mode_match = re.search(r'(?i)\b(Normal|Mormal|Small|Minor|Saving|Savings|Current(?!\s*Address)|CC|OD)\b', raw_text)
     # Build a table structure of the extracted data
