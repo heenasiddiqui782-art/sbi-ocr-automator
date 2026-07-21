@@ -42,7 +42,7 @@ if uploaded_file is not None:
    # Updated to accept standard PAN format OR a 10-digit numeric ID
     pan_match = re.search(r'(?i)PAN[\s\S]{0,100}?\b([A-Z0-9]{10})\b', raw_text)
     mobile_match = re.search(r'(?i)Mobile(?:\s*No\.?|\s*Number)?\s*[:\-]?\s*(\d{10})', raw_text)
-    mode_match = re.search(r'(?i)\b(Normal|Mormal|Small|Minor|Saving|Savings|Current(?!\s*Address)|CC|OD)\b', raw_text)
+    mode_match = re.search(r'(?i)(?:Account Type|A/c Type|Type)[\s:.-]*(Normal|Small|Minor|Saving|Savings|Current|CC|OD)\b', raw_text)
     # Build a table structure of the extracted data
     extracted_data = {
         "Field Name": [
