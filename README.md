@@ -21,6 +21,14 @@ The **Customer Form OCR Automator** was built as a proof-of-concept for **State 
 
 ---
 
+## 🎬 Live Demo Video
+
+https://drive.google.com/drive/folders/1quVfSmCMFboRL_nk04OhzGKiHI8DUHFV?usp=sharing
+
+> **Video Walkthrough:** [Click here to watch the 1-minute application walkthrough](https://drive.google.com/drive/folders/1quVfSmCMFboRL_nk04OhzGKiHI8DUHFV?usp=sharing) showing form upload, real-time OCR extraction, regex field mapping, and CSV export.
+
+---
+
 ## ⚡ Key Features
 
 <details>
@@ -51,24 +59,24 @@ Instead of making false guesses that could corrupt a banking database, the syste
 ### 1. Document Upload & Interface
 *Clean, web-based Streamlit UI built for non-technical branch officials.*
 
-![1. Document Upload Interface](docs/screenshots/upload_interface.png)
-*(Note: Replace with your actual upload screen screenshot)*
+<img width="960" height="490" alt="S1" src="https://github.com/user-attachments/assets/0bcf9a22-1556-47e1-9b6a-fb6360febaf1" />
+
 
 ---
 
 ### 2. Structured Data Extraction & Regex Mapping
 *Raw image text is instantly converted into validated tabular output.*
 
-![2. Structured Data Extraction](docs/screenshots/structured_output.png)
-*(Note: Replace with your actual extracted text/table screenshot)*
+<img width="960" height="518" alt="S2" src="https://github.com/user-attachments/assets/e8c25e09-db2c-4c0b-b994-440ae096b3a0" />
+
 
 ---
 
 ### 3. Safety Flagging & Edge-Case Handling
 *Ambiguous characters or comb-boxed fields are safely flagged for human verification.*
 
-![3. Review Required Flagging](docs/screenshots/review_required.png)
-*(Note: Replace with a screenshot showing the "Review Required" feature in action)*
+<img width="1920" height="1003" alt="S3" src="https://github.com/user-attachments/assets/c9ee68f8-c9e4-4bdd-8152-cd18b240ec92" />
+
 
 ---
 
